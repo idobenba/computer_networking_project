@@ -1,0 +1,62 @@
+when calculating gps, need to take into consideration how
+to know when the next packet arrives to the queue
+
+
+currently - in the middle of pgps -
+    find_message_to_send_from_queue
+        find_gps_ending_times
+            
+-------------------------------------------------------------------
+message types in timeline:
+create
+ReceiveFromHost
+ReceiveFromSwitch
+
+if event type is create:
+find target to send
+find link to send
+create the message
+try to send, if link is busy:
+    add message to host buffer
+if link is not busy:
+    if host buffer is empty:
+        send message to switch (creating a new ReceiveFromHost event scheduled when link is empty)
+    if host buffer is not empty:
+        add message to host buffer
+        get queued message from host buffer
+        send queued message to switch (creating a new ReceiveFromHost event scheduled when link is empty)
+        update link time sent
+
+if event type is ReceiveFromHost:
+find target to send
+find link to send
+send message to switch (creating a new ReceiveFromHost event scheduled when link is empty)
+
+if event type is ReceiveFromSwitch or dest link has not sent:
+find target to send
+find link to send
+if queue is not empty:
+    if link is not busy:
+        get queued message from switch queue
+        update latest departure time for corresponding priority as event time
+        update latest departure from switch as event time
+        send message from switch to host (creating a new ReceiveFromSwitch event scheduled when link is empty)
+
+every round:
+if queue is not empty:
+    if link is not busy:
+        find queued message
+        send message to host (creating a new ReceiveFromSwitch event scheduled when link is empty)
+        update latest departure time for corresponding priority as event time
+        update latest departure from switch as event time
+        send message from switch to host (creating a new ReceiveFromSwitch event scheduled when link is empty)
+        update link time sent
+        update link trans_size
+
+
+todo
+done - on all send_message functions, create new events
+    done - send from host to switch
+    done - send from switch to host
+done - implement event type create
+adding event to switch queue according to alg

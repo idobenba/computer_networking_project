@@ -1,0 +1,236 @@
+comp network lab 2 questions
+
+no problem with sending msgs after creation
+
+links should not have queues, move it to switches
+
+
+how to count HoL blocking
+when packet suppoused to send but cant, check next packet to send
+
+
+fifo implementation - search for earliest arrival time between top of queues
+
+
+----------------------------------------------------------------------------------------------------------------
+make new main state for part 2:
+    create source hosts
+    create destination hosts
+    create switch
+    create links
+    initialize switch ports
+    create switch queues
+    create main timeline
+    run main loop
+    run rest of queue
+    print stats
+
+main loop:
+#in each run of main loop, check if there are packets in switch and try to deal with
+if create:
+
+
+
+hol init, if link not free:
+add to switch hol blocker[queue_number] = [blocking_message, blocking_start_time]
+
+hol calc, when msg was sent from switch:
+if hol blocker[queue_number] != None:
+    total_hol_time += current_time - blocking_start_time
+^^^# this is like event.schedule_time - hol_blocker[queue_number][1] ^^^
+
+    hol blocker[queue_number] = None
+
+
+send rest of buffers and queues:
+while there_are_messeges in queues or buffers:
+    if switch flag:
+        for each switch:
+            find earliest message in top of queues
+            (if no msgs in queues, break from loop)
+            if link is free:
+                send message to dst host
+                update link.time_sent
+                calc_hol_blocking
+            if link is not free:
+                calculate hol blocking
+
+    if host flag:
+        for each host:
+            find earliest message from buffers
+            (if no msgs in queues, break from loop and update host flag)
+            if link is free:
+                send message to switch
+                update link.time_sent
+                update switch flag
+                break from host loop
+            if link is not free:
+                break from host loop
+
+
+
+
+
+
+
+
+todo -
+done - create virtual queues
+done - run main loop - implement virtual queues
+done - receive_message_part_2 - implement virtual queues
+done - flooding_part_2 - deal with virtual queue
+done - hol blocking start for virtual queues
+done - hol blocking calculation for virtual queues
+done - send rest of buffers and queues - implement virtual queues
+done - print stats - implement virtual queues
+
+remove messages in buffer print
+
+
+
+----------------------------------------------------------------------------------------------------------------
+BELOW IS WRONG - DO NOT USE
+----------------------------------------------------------------------------------------------------------------
+
+
+switch receiving msgs:
+add to table
+if not flood:
+	put msg in appropriate queue
+	create msg sending event and put it in a seperate sending timeline
+	
+if flood:
+	duplicate msgs
+	for each msg duplicated:
+		if link free:
+			send
+		if link not free:
+			put in head of respective queue and timeline with same scheduling time as original msg
+
+
+switch sending msgs:
+
+
+update flood:
+done - find sending host
+input done, need to do output - duplicate original message and put duplicates in same queue
+
+done - create sending events for new messages, place them in timeline and sort it
+
+
+todo:
+done - update receiving msgs
+add check for sending msg queue
+add sending event creation
+add receiving msg not in flood
+
+sending event:
+find sending switch
+find curr message
+find correct link
+if link is busy:
+	cant_send flag=true ????
+	calculate HoL blocking
+	place curr message event right after switches last departure time
+
+	
+if link is not busy:
+    remove from queue
+	send message
+	update departure times ????
+
+
+
+calculate HoL blocking:
+find top of queues and sort by scheduling time
+find curr_message from top of queues
+find next_message_from_top_of_queues from top of queues
+find curr_queue
+for message in curr_queue:
+	if message.scheduling_time < next_message_from_top_of_queues.scheduling_time:
+	    CHECK IF LINK IS FREE ??????
+		total_hol_time +=1
+	else:
+		break
+----------------------------------------------------------------------------------------------------------------
+after message created
+go over switch queue, find the earliest message
+check if dst is known to switch
+if known:
+    if link is free:
+        send to dst
+    if link is not free:
+        continue to next create event
+if not known:
+    flood:
+        find hosts that are not src of message
+        for each valid host:
+            try to send message:
+                if link is free:
+                    send
+                if link is not free:
+                    put in head of respective queue
+
+
+
+sending from host to switch:
+link sends from host to switch
+switch receives message:
+    add to correct queue
+
+
+send_rest_of_buffers_and_queues:
+while there are messages in queues or buffers:
+    for each switch:
+        find earliest message in top of queues
+        try to send earliest message:
+            if link is free:
+                send message to dst host
+            if link is not free:
+                calculate hol blocking
+                continue to next buffer message
+    for each host:
+        find earliest message from buffers
+        try to send earliest message:
+            if link is free:
+                send message to switch
+            if link is not free:
+                continue to next switch message
+
+----------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
